@@ -9,6 +9,7 @@ var yCoord = 0;
 var snakee;
 var apple;
 var score = 0 ; 
+var gamePaused = false; 
 
 window.onload = function() {
   init();
@@ -28,18 +29,23 @@ window.onload = function() {
 
   function refreshCanvas() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    snakee.advance();
-
-    if (snakee.checkCollision(apple)) {
-      snakee.grow();
-      apple.move();
-      score ++; 
+    if (!gamePaused) {
+      snakee.advance();
+      if (snakee.checkCollision(apple)) {
+        snakee.grow();
+        apple.move();
+        score++;
+      }
     }
-    drawScore(); 
+  
+    drawScore();
     snakee.draw();
     apple.draw();
-    setTimeout(refreshCanvas, delay);
+    if (!gamePaused) {
+      setTimeout(refreshCanvas, delay);
+    }
   }
+  
 
   function drawScore() {
     ctx.font = "20px Arial";
@@ -146,24 +152,33 @@ function drawBlock(ctx, position, color) {
   document.onkeydown = function handleKeyDown(e) {
     var key = e.keyCode;
     var newDirection;
-
-    switch (key) {
-      case 37: // Flèche gauche
-        newDirection = "left";
-        break;
-      case 38: // Flèche haut
-        newDirection = "up";
-        break;
-      case 39: // Flèche droite
-        newDirection = "right";
-        break;
-      case 40: // Flèche bas
-        newDirection = "down";
-        break;
-      default:
-        // Autre touche enfoncée, aucune nouvelle direction définie
-        break;
+  
+    if (key === 32) { // Vérifie si la touche enfoncée est "Espace"
+      gamePaused = !gamePaused; // Inverse l'état de pause
+      if (!gamePaused) {
+        // Si le jeu est en pause et la touche "Espace" est à nouveau enfoncée, relance le jeu
+        refreshCanvas();
+      }
+    } else {
+      switch (key) {
+        case 37: // Flèche gauche
+          newDirection = "left";
+          break;
+        case 38: // Flèche haut
+          newDirection = "up";
+          break;
+        case 39: // Flèche droite
+          newDirection = "right";
+          break;
+        case 40: // Flèche bas
+          newDirection = "down";
+          break;
+        default:
+          // Autre touche enfoncée, aucune nouvelle direction définie
+          break;
+      }
+      snakee.setDirection(newDirection);
     }
-    snakee.setDirection(newDirection);
   };
+  
 };
